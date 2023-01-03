@@ -1,17 +1,40 @@
-let db = new Nedb({ filename: "Editedt"});
+let db = new Nedb({ filename: "PlayerOnlinePlutonium"});
 db.loadDatabase(async function (err) {
   db.insert({Date: await getDateFormatted(), value: await getPlayer(), today: new Date()})
 });
 db.find({}).sort({ createdAt: -1 }).exec(async function (err, docs) {
   var data = await sortArrayByDate(docs)
-  var data = await data.slice(-20)
+  var data = await data.slice(-1000)
   const players = await document.getElementById("players");
   const playersChart = await new Chart(players,{
     type:"line",
+    options: {
+      scales: {
+        y: {
+          ticks: { color: 'rgb(184,184,189)'},
+          beginAtZero: true
+        },
+        x: {
+          ticks: { color: 'rgb(184,184,189)'}
+        }
+      },
+      animation: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+      }
+    },
     data:{
       labels: await data.map(row => row.Date),
       datasets:[{
-        data: await data.map(row => row.value)
+        data: await data.map(row => row.value),
+        borderColor: 'rgb(94,88,229)',
+        tension: 0.1,
+        pointBackgroundColor : 'rgba(94,88,229,0)',
+        pointBorderColor : 'rgba(94,88,229,0)',
+        pointHoverBorderColor : 'rgb(94,88,229)',
+        spanGaps :true
       }]
     }
   })
