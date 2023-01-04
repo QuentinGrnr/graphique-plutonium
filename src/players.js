@@ -12,10 +12,16 @@ db.find({}).sort({ createdAt: -1 }).exec(async function (err, docs) {
       scales: {
         y: {
           ticks: { color: 'rgb(184,184,189)'},
-          beginAtZero: true
+          beginAtZero: true,
+          grid : {
+            color : 'rgb(63,63,65)'
+          }
         },
         x: {
-          ticks: { color: 'rgba(184,184,189,0)'}
+          ticks: { color: 'rgba(184,184,189,0)'},
+          grid : {
+            color : 'rgb(52,52,54)'
+          }
         }
       },
       animation: true,
