@@ -15,7 +15,7 @@ db.find({}).sort({ createdAt: -1 }).exec(async function (err, docs) {
           beginAtZero: true
         },
         x: {
-          ticks: { color: 'rgb(184,184,189)'}
+          ticks: { color: 'rgba(184,184,189,0)'}
         }
       },
       animation: true,
