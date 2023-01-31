@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3')
 const fetch = require('node-fetch');
 const { text } = require('express');
 
+
 let db = new sqlite3.Database('players_online.sqlite', err => {
   if (err) throw err
   console.log('data base "player_online.sqlite" bien active')
@@ -66,6 +67,7 @@ async function add_players_data(name,ip){
               throw err
           })
         })
+
   }catch{
     console.log(err)
   }
