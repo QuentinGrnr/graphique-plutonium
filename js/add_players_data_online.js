@@ -9,7 +9,7 @@ let db = new sqlite3.Database('players_online.sqlite', err => {
 })
 
 async function add_serveur_api(name,ip,couleur){
-  await db.run('CREATE TABLE IF NOT EXISTS serveur_api(name VARCHAR, ip VARCHAR,couleur VARCHAR)')
+  db.run('CREATE TABLE IF NOT EXISTS serveur_api(name VARCHAR, ip VARCHAR,couleur VARCHAR)')
   db.all('SELECT * FROM serveur_api', async (err, data) => {
     validator = 0
     for (let i = 0; i < data.length; i++) {
@@ -20,8 +20,9 @@ async function add_serveur_api(name,ip,couleur){
     }
     if(validator==0){
       db.run('INSERT INTO serveur_api(name,ip,couleur) VALUES(?,?,?)', [name, ip,couleur]);
-      db.run('CREATE TABLE IF NOT EXISTS ' + name + '_players_online(hour VARCHAR, players BLOB)')
+      db.run('CREATE TABLE ' + name + '_players_online(hour VARCHAR, players BLOB)')
       db.all('SELECT * FROM serveur_api', async (err, data) => {
+        console.log(data)
       })
     }
     else {
@@ -29,14 +30,14 @@ async function add_serveur_api(name,ip,couleur){
     }
   })
 }
-add_serveur_api("plutonium","mcpe.plutonium.best"," #6B39C7")
+add_serveur_api("plutonium","mcpe.plutonium.best","#6B39C7")
 add_serveur_api("histeria","play.histeria.fr","#1A9550")
 add_serveur_api("linesia","play.linesia.eu","#175EB1")
 add_serveur_api("Vazo","vazo.mcpe.eu","#E24343")
 add_serveur_api("Endiorite","play.endiorite.com","#E2AB43")
 add_serveur_api("Futonium","play.futonium.fr","#E243DD")
 
-getdata_ip()
+
 async function getdata_ip(){
   let heure = new Date().getMinutes();
   if (heure % 5 === 0) {
@@ -66,6 +67,7 @@ async function add_players_data(name,ip){
       .then( async (text) => {
         db.run('INSERT INTO ' + name + '_players_online(hour,players) VALUES(?,?)', [ await getDateFormatted(), text.players.online]);
         db.all('SELECT * FROM ' + name + '_players_online', (err, data) => {
+          console.log(data)
           if (err)
             throw err
         })

@@ -1,21 +1,21 @@
 async function getOnlinePlayer() {
   try {
     const response = await fetch(
-      `http://hms12432.hostmyservers.me:5000/api/v1/serveur`
+      `http://hms12432.hostmyservers.me:500/api/v1/serveur`
     );
     responses = await response.json()
     serveur = responses.serveur
     let result = [];
     for (let i = 0; i < serveur.length; i++) {
       let serveurinfo = await fetch(
-        `http://hms12432.hostmyservers.me:5000/api/v1/players/` + serveur[i].name
+        `http://hms12432.hostmyservers.me:500/api/v1/players/` + serveur[i].name
       );
       data = await serveurinfo.json()
       result.push({
         label: data.name,
         data: await data.data.map(row => row.players),
-        borderColor: 'rgb(94,88,229)',
-        tension: 0.1
+        borderColor: "#E2AB43",
+        tension: 0.1,
       })
     }
     return result
@@ -26,7 +26,7 @@ async function getOnlinePlayer() {
 async function getHours() {
   try {
     let serveurinfo = await fetch(
-      `http://hms12432.hostmyservers.me:5000/api/v1/players/plutonium`
+      `http://hms12432.hostmyservers.me:500/api/v1/players/plutonium`
     );
     data = await serveurinfo.json()
     return data.data.map(row => row.hour)
