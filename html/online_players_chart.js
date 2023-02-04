@@ -43,6 +43,15 @@ async function build_chart_player_online(){
   const playersChart = await new Chart(players,{
     type:"line",
     options: {
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              size: 12,
+            }
+          }
+        }
+      },
       scales: {
         y: {
           max:200,
@@ -53,11 +62,14 @@ async function build_chart_player_online(){
           }
         },
         x: {
+          ticks: { color: 'rgb(184,184,189)'},
           grid : {
-            color : 'rgb(52,52,54)'
+            color : 'rgb(52,52,54)',
+
           }
         }
       },
+
       animation: true,
     },
     data:{
