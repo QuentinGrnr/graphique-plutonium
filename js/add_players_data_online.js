@@ -4,12 +4,13 @@ const fetch = require('node-fetch');
 const { text } = require('express');
 
 let db = new sqlite3.Database('players_online.sqlite', err => {
-  if (err) throw err
-  console.log('data base "player_online.sqlite" bien active')
-})
+  console.log(err)
+    if (err) throw err
+    console.log('data base "player_online.sqlite" bien active')
+  })
 
 async function add_serveur_api(name,ip,couleur){
-  db.run('CREATE TABLE IF NOT EXISTS serveur_api(name VARCHAR, ip VARCHAR,couleur VARCHAR)')
+  db.run('CREATE TABLE IF NOT EXISTS serveur_api(id INTEGER PRIMARY KEY AUTOINCREMENT,name VARCHAR, ip VARCHAR,couleur VARCHAR)')
   db.all('SELECT * FROM serveur_api', async (err, data) => {
     validator = 0
     for (let i = 0; i < data.length; i++) {
@@ -20,13 +21,12 @@ async function add_serveur_api(name,ip,couleur){
     }
     if(validator==0){
       db.run('INSERT INTO serveur_api(name,ip,couleur) VALUES(?,?,?)', [name, ip,couleur]);
-      db.run('CREATE TABLE ' + name + '_players_online(hour VARCHAR, players BLOB)')
+      db.run('CREATE TABLE ' + name + '_players_online(id INTEGER PRIMARY KEY AUTOINCREMENT,hour VARCHAR, players BLOB)')
       db.all('SELECT * FROM serveur_api', async (err, data) => {
-        console.log(data)
       })
     }
     else {
-      return 0
+      return 0 
     }
   })
 }
@@ -39,42 +39,82 @@ add_serveur_api("Futonium","play.futonium.fr","#E243DD")
 
 
 async function getdata_ip(){
-  let heure = new Date().getMinutes();
-  if (heure % 5 === 0) {
+  let minute = new Date().getMinutes();
+if (minute % 5 === 0) {
+  db.all('SELECT * FROM serveur_api', async (err, data) => {
+    for (let i = 0; i < data.length; i++) {
+      await add_players_data(data[i].name,data[i].ip)
+    }
+  })
+  setInterval(() => {
     db.all('SELECT * FROM serveur_api', async (err, data) => {
       for (let i = 0; i < data.length; i++) {
         await add_players_data(data[i].name,data[i].ip)
       }
     })
-    setInterval(() => {
-      db.all('SELECT * FROM serveur_api', async (err, data) => {
-        for (let i = 0; i < data.length; i++) {
-          await add_players_data(data[i].name,data[i].ip)
-        }
-      })
-    }, 300000);
-  } else {
-    setTimeout(getdata_ip,30000)
-  }
+  }, 300000);
+} else {
+  setTimeout(getdata_ip,30000)
+}
 }
 
 
 async function add_players_data(name,ip){
-  try {
     await fetch(
       `https://api.mcstatus.io/v2/status/bedrock/` + ip)
       .then(res => res.json())
       .then( async (text) => {
-        db.run('INSERT INTO ' + name + '_players_online(hour,players) VALUES(?,?)', [ await getDateFormatted(), text.players.online]);
-        db.all('SELECT * FROM ' + name + '_players_online', (err, data) => {
-          console.log(data)
-          if (err)
-            throw err
-        })
-      })
-  }catch{
-    console.log(err)
-  }
+        if(text.online == true){
+          db.all('SELECT COUNT(*) FROM  ' + name + '_players_online', async (err, data1) => {
+            if (err) {
+                console.log(err)
+            } else {
+                let count = data1[0]['COUNT(*)'];
+                if (count < 288){
+                  db.run('INSERT INTO ' + name + '_players_online(hour,players) VALUES(?,?)', [ await getDateFormatted(), text.players.online]);
+                  db.all('SELECT * FROM ' + name + '_players_online', (err, data) => {
+                    console.log(data)
+                    if (err)
+                      throw err
+                  })
+                }else{
+                  db.run('DELETE FROM ' + name + '_players_online WHERE id = (SELECT MIN(id) FROM ' + name + '_players_online)')
+                  db.run('INSERT INTO ' + name + '_players_online(hour,players) VALUES(?,?)', [ await getDateFormatted(), text.players.online]);
+                  db.all('SELECT * FROM ' + name + '_players_online', (err, data) => {
+                    console.log(data)
+                    if (err)
+                      throw err
+                  })
+                }
+        }
+      });
+        }
+        else{
+          db.all('SELECT COUNT(*) FROM  ' + name + '_players_online', async (err, data1) => {
+            if (err) {
+                console.log(err)
+            } else {
+                let count = data1[0]['COUNT(*)'];
+                if (count < 288){
+                  db.run('INSERT INTO ' + name + '_players_online(hour,players) VALUES(?,?)', [ await getDateFormatted(), 0]);
+                  db.all('SELECT * FROM ' + name + '_players_online', (err, data) => {
+                    console.log(data)
+                    if (err)
+                      throw err
+                  })
+                }else{
+                  db.run('DELETE FROM ' + name + '_players_online WHERE id = (SELECT MIN(id) FROM ' + name + '_players_online)')
+                  db.run('INSERT INTO ' + name + '_players_online(hour,players) VALUES(?,?)', [ await getDateFormatted(), 0]);
+                  db.all('SELECT * FROM ' + name + '_players_online', (err, data) => {
+                    console.log(data)
+                    if (err)
+                      throw err
+                  })
+                }
+        }
+      });
+        }
+    })
 }
 
 function getDateFormatted() {
@@ -83,3 +123,5 @@ function getDateFormatted() {
   var minutes = (now.getMinutes() < 10 ? "0" + now.getMinutes() : now.getMinutes())
   return hour + ":" + minutes;
 }
+
+getdata_ip()

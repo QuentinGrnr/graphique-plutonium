@@ -14,7 +14,7 @@ async function getOnlinePlayer() {
       result.push({
         label: data.name,
         data: await data.data.map(row => row.players),
-        borderColor: "#E2AB43",
+        borderColor: serveur[i].couleur,
         tension: 0.1,
       })
     }
