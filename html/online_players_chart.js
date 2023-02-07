@@ -43,6 +43,11 @@ async function build_chart_player_online(){
   const playersChart = await new Chart(players,{
     type:"line",
     options: {
+      elements: {
+        point:{
+          radius: 0
+        }
+      },
       plugins: {
         legend: {
           labels: {
@@ -54,7 +59,6 @@ async function build_chart_player_online(){
       },
       scales: {
         y: {
-          max:200,
           ticks: { color: 'rgb(184,184,189)'},
           beginAtZero: true,
           grid : {
